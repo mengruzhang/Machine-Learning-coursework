@@ -1,9 +1,9 @@
-#SVM using QP
+# SVM using QP
 install.packages("R.matlab") #used to load .mat data into R
 install.packages("quadprog")
 library(quadprog)
 library(R.matlab)
-#data
+# data
 data <- readMat('faces.mat')
 train <- data$traindata
 dim(train)
@@ -16,7 +16,7 @@ y.test <- as.vector(data$testlabels)
 n<-dim(train)[1]
 y.train[which(y.train==2)]=-1
 
-#build the system matrices
+# build the system matrices
 Q<-sapply(1:n, function(i) y.train[i]*t(train)[,i])
 D<-t(Q)%*%Q
 d<-matrix(1, nrow=n)
@@ -28,7 +28,7 @@ sol<-solve.QP(D, d, A, b0, meq=1, factorized=FALSE)
 qpsol<-matrix(sol$solution, nrow=n)
 
 
-#build the classifier
+# build the classifier
 ind<-which(abs(qpsol)>1e-7)
 alpha<-qpsol[ind]
 x.tr<-train[ind,]
@@ -38,14 +38,14 @@ y.tr<-y.train[ind]
 w<-alpha%*%diag(y.tr)%*%x.tr
 b<-mean(y.tr-t(w%*%t(x.tr)))
 
-#prediction
+# prediction
 y.pre.tr<-sign(w%*%t(train)-b)
 print("train error of SVM")
 sum(y.pre.tr!=y.train)/280
 
 y.pre.te<-sign(w%*%t(test)-b)
 y.test[which(y.test==2)]=-1
-print("train error of SVM")
+print("test error of SVM")
 sum(y.pre.te!=y.test)/120
 
 
